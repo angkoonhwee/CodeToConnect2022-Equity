@@ -1,6 +1,6 @@
-package parser;
+package main.parser;
 
-import tradingEngine.Order;
+import main.tradingEngine.Order;
 
 public class FIXParser {
     private final static String SIDE_TAG = "54";

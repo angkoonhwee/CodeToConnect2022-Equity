@@ -1,5 +1,7 @@
-import parser.FIXParser;
-import parser.MarketDataParser;
+package main;
+
+import main.parser.FIXParser;
+import main.parser.MarketDataParser;
 
 import java.io.BufferedReader;
 import java.io.File;

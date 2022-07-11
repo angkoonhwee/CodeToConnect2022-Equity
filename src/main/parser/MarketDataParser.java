@@ -1,8 +1,8 @@
-package parser;
+package main.parser;
 
-import marketSimulator.Ask;
-import marketSimulator.Bid;
-import marketSimulator.OrderBook;
+import main.marketSimulator.Ask;
+import main.marketSimulator.Bid;
+import main.marketSimulator.OrderBook;
 
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;

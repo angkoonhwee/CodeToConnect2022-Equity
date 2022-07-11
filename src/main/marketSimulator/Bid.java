@@ -1,4 +1,4 @@
-package marketSimulator;
+package main.marketSimulator;
 
 public class Bid implements Comparable<Bid> {
     public int bidSize;

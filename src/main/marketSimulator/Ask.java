@@ -1,4 +1,4 @@
-package marketSimulator;
+package main.marketSimulator;
 
 public class Ask implements Comparable<Ask> {
     public int askSize;
