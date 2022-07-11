@@ -6,6 +6,7 @@ import main.marketSimulator.OrderBook;
 
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 public class MarketDataParser {
     private final String QUOTE = "Q";
@@ -27,7 +28,7 @@ public class MarketDataParser {
        return null;
     }
 
-    private PriorityQueue<Bid> parseBids(String bids) {
+    private TreeSet<Bid> parseBids(String bids) {
         StringTokenizer splitBids = new StringTokenizer(bids, " ");
 
         if (splitBids.countTokens() % 2 != 0) {
@@ -35,21 +36,21 @@ public class MarketDataParser {
                     "Please check bids. Number of bid prices does not match number of bid sizes.");
         }
 
-        PriorityQueue<Bid> pq = new PriorityQueue<>();
+        TreeSet<Bid> treeSet = new TreeSet<>();
 
         while (splitBids.countTokens() > 0) {
             double bidPrice = Double.parseDouble(splitBids.nextToken());
             int bidSize = Integer.parseInt(splitBids.nextToken());
             Bid bid = new Bid(bidSize, bidPrice);
 
-            pq.add(bid);
+            treeSet.add(bid);
         }
 
-        System.out.println(pq);
-        return pq;
+        System.out.println(treeSet);
+        return treeSet;
     }
 
-    private PriorityQueue<Ask> parseAsks(String asks) {
+    private TreeSet<Ask> parseAsks(String asks) {
         StringTokenizer splitAsks = new StringTokenizer(asks, " ");
 
         if (splitAsks.countTokens() % 2 != 0) {
@@ -57,17 +58,17 @@ public class MarketDataParser {
                     "Please check asks. Number of ask prices does not match number of ask sizes.");
         }
 
-        PriorityQueue<Ask> pq = new PriorityQueue<>();
+        TreeSet<Ask> treeSet = new TreeSet<>();
 
         while (splitAsks.countTokens() > 0) {
             double askPrice = Double.parseDouble(splitAsks.nextToken());
             int askSize = Integer.parseInt(splitAsks.nextToken());
             Ask ask = new Ask(askSize, askPrice);
 
-            pq.add(ask);
+            treeSet.add(ask);
         }
 
-        System.out.println(pq);
-        return pq;
+        System.out.println(treeSet);
+        return treeSet;
     }
 }

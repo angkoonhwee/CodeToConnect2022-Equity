@@ -9,6 +9,8 @@ public class Order {
     public int price;
     public int quantity;
     public double targetPercentage;
+    public double minRatio;
+    public double maxRatio;
     private int idealVol;
 
     public enum orderType {
@@ -21,7 +23,13 @@ public class Order {
     public Order(orderType type, int quantity, double targetPercentage) {
         this.type = type;
         this.quantity = quantity;
-        this.targetPercentage = targetPercentage;
+        this.targetPercentage = targetPercentage/100;
+        this.minRatio = (0.8 * targetPercentage)/100;
+        this.maxRatio = (1.2 * targetPercentage)/100;
+    }
+
+    public void setIdealVol(int marketVol) {
+        this.idealVol = (int) (marketVol * targetPercentage);
     }
 
     @Override
