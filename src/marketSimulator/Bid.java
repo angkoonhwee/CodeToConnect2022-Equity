@@ -17,4 +17,9 @@ public class Bid implements Comparable<Bid> {
     public int compareTo(Bid anotherBid) throws IllegalArgumentException {
         return Double.compare(this.bidPrice, anotherBid.bidPrice);
     }
+
+    @Override
+    public String toString() {
+        return "[Bid Size: " + bidSize + "; Bid Price: " + bidPrice + "]";
+    }
 }

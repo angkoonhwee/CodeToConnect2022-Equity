@@ -2,13 +2,13 @@ package parser;
 
 import tradingEngine.Order;
 
-public class FIXParser implements Parser {
+public class FIXParser {
     private final static String SIDE_TAG = "54";
     private final static String SIDE_BUY = "1";
     private final static String SIDE_SELL = "2";
     private final static String ORDER_TYPE_TAG = "40=1";
     private final static String ORDER_QUANTITY_TAG = "38";
-    private final static String TARGET_PERCENTAGE_TAG = "6064";
+    private final static String TARGET_PERCENTAGE_TAG = "6404";
 
     public Order parse(String fixMessage) {
 
@@ -16,7 +16,7 @@ public class FIXParser implements Parser {
         int quantity = 0;
         double targetPercentage = 0.0;
 
-        String[] tags = fixMessage.split(";");
+        String[] tags = fixMessage.replaceAll("\\s", "").split(";");
 
         for (String tag : tags) {
             String[] processedTag = tag.split("=");
@@ -36,6 +36,8 @@ public class FIXParser implements Parser {
             }
         }
 
-        return new Order(type, quantity, targetPercentage);
+        Order order = new Order(type, quantity, targetPercentage);
+        System.out.println(order);
+        return order;
     }
 }

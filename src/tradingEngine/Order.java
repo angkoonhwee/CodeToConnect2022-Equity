@@ -23,4 +23,11 @@ public class Order {
         this.quantity = quantity;
         this.targetPercentage = targetPercentage;
     }
+
+    @Override
+    public String toString() {
+        return "[Order quantity: " + quantity
+                + "; Target Percentage: " + targetPercentage
+                + "]";
+    }
 }

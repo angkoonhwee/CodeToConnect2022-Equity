@@ -13,4 +13,9 @@ public class Ask implements Comparable<Ask> {
     public int compareTo(Ask anotherAsk) {
         return Double.compare(anotherAsk.askPrice, this.askPrice);
     }
+
+    @Override
+    public String toString() {
+        return "[Ask Size: " + askSize + "; Ask Price: " + askPrice + "]";
+    }
 }
