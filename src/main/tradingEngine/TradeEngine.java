@@ -50,14 +50,12 @@ public class TradeEngine {
             while (potentialCumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio
                     && asks.hasNext()) {
                 Ask currAsk = asks.next();
-                int shortfall =
-                        (int) (market.getCurrMarketVol() * clientOrder.minRatio) - potentialCumulativeQuantity;
 
                 // if shortfall is greater than currAsk size, quantity placed is limited to ask size
-                if (shortfall > currAsk.askSize) {
-                    shortfall = currAsk.askSize;
-                }
-
+                int shortfall = Math.max(
+                        currAsk.askSize,
+                        (int) (market.getCurrMarketVol() * clientOrder.minRatio) - potentialCumulativeQuantity);
+                
                 double price = currAsk.askPrice;
 
                 ChildOrder order = new ChildOrder(shortfall, price, Order.actionType.NEW);
@@ -65,8 +63,8 @@ public class TradeEngine {
 
                 potentialCumulativeQuantity += shortfall;
             }
+
             // For passive posting.
-            // If order quantity is fulfilled or no more bids left.
             while (potentialCumulativeQuantity == clientOrder.quantity || bids.hasNext()) {
                 Bid currBid = bids.next();
                 int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
@@ -77,7 +75,7 @@ public class TradeEngine {
 
                 potentialCumulativeQuantity += quantity;
             }
-        }
+        } // breach max case
         logger.logOrders(childOrders);
     }
 }
