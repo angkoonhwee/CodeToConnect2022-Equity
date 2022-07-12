@@ -12,7 +12,7 @@ public class ParentOrder extends Order {
     public double targetPercentage;
     public double minRatio;
     public double maxRatio;
-    private int idealVol;
+    public int cumulativeQuantity = 0;
 
     public ParentOrder(orderType type, int quantity, double targetPercentage) {
         super(quantity);
@@ -22,7 +22,15 @@ public class ParentOrder extends Order {
         this.maxRatio = (1.2 * targetPercentage)/100;
     }
 
-    public void setIdealVol(int marketVol) {
-        this.idealVol = (int) (marketVol * targetPercentage);
+    public void updateCumulativeQuatity(int amount) {
+        this.cumulativeQuantity += amount;
+    }
+
+    @Override
+    public String toString() {
+        return "[Quantity: " + quantity
+                + ", TargetPercentage: " + targetPercentage
+                + ", Cumulated Quantity: " + cumulativeQuantity
+                + ']';
     }
 }

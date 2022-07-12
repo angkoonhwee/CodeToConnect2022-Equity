@@ -5,7 +5,6 @@ import main.marketSimulator.Market;
 import main.marketSimulator.OrderBook;
 import main.parser.FIXParser;
 import main.parser.MarketDataParser;
-import main.tradingEngine.Order;
 import main.tradingEngine.ParentOrder;
 import main.tradingEngine.TradeEngine;
 
@@ -20,7 +19,9 @@ public class Equity {
 
     public static void main(String[] args) {
         MarketDataParser mdp = new MarketDataParser();
+        FIXParser fixParser = new FIXParser();
         EquityLogger logger = new EquityLogger();
+
         TradeEngine tradeEngine;
         Market market = new Market();
 
@@ -30,15 +31,20 @@ public class Equity {
             logger.setupLogger("Equity", rootPath + "outputLog.txt");
             FileReader fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
-            String csv = br.readLine();
-
-            OrderBook orderBook = mdp.parse(csv);
-            FIXParser fixParser = new FIXParser();
             ParentOrder order = fixParser.parse("54=1; 40=1; 38=10000; 6404=10");
-            market.setOrderBook(orderBook);
 
             tradeEngine = new TradeEngine(market, order, logger);
-            tradeEngine.sliceOrder();
+
+            String csv;
+            while ((csv = br.readLine()) != null) {
+                OrderBook orderBook = mdp.parse(csv);
+                market.setOrderBook(orderBook);
+                market.updateMarketVol(100000);
+                tradeEngine.sliceOrder();
+                break;
+            }
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -1,6 +1,7 @@
 package main.tradingEngine;
 
 import main.logger.EquityLogger;
+import main.marketSimulator.Ask;
 import main.marketSimulator.Bid;
 import main.marketSimulator.Market;
 import main.marketSimulator.OrderBook;
@@ -15,23 +16,24 @@ import java.util.Iterator;
 public class TradeEngine {
     Market market;
     ParentOrder clientOrder;
-    OrderBook orderBook;
     EquityLogger logger;
 
     public TradeEngine(Market market, ParentOrder order, EquityLogger logger) {
         this.market = market;
         this.clientOrder = order;
         this.logger = logger;
-
-        orderBook = market.getOrderBook();
     }
 
     public void sliceOrder() {
+        OrderBook orderBook = market.getOrderBook();
+        Iterator<Bid> bids = orderBook.getBids().iterator();
+        Iterator<Ask> asks = orderBook.getAsks().iterator();
         ArrayList<ChildOrder> childOrders = new ArrayList<>();
-        // market has just opened or order has been fulfilled, should use passive posting
-        if (market.getCurrMarketVol() == 0 || market.getCurrMarketVol() == clientOrder.quantity) {
-            Iterator<Bid> bids = orderBook.getBids().iterator();
+        int potentialCumulativeQuantity = clientOrder.cumulativeQuantity;
 
+        if (market.getCurrMarketVol() == 0
+                || market.getCurrMarketVol() == clientOrder.quantity) {
+            // market has just opened or order has been fulfilled, passive posting
             while (bids.hasNext()) {
                 Bid currBid = bids.next();
                 int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
@@ -39,9 +41,43 @@ public class TradeEngine {
 
                 ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
                 childOrders.add(order);
-            }
 
-            logger.logOrders(childOrders);
+                potentialCumulativeQuantity += quantity;
+            }
+        } else if (clientOrder.cumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio) {
+            // Cumulative order is lower than minimum ratio.
+            // Aggressive buys till shortfall is covered.
+            while (potentialCumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio
+                    && asks.hasNext()) {
+                Ask currAsk = asks.next();
+                int shortfall =
+                        (int) (market.getCurrMarketVol() * clientOrder.minRatio) - potentialCumulativeQuantity;
+
+                // if shortfall is greater than currAsk size, quantity placed is limited to ask size
+                if (shortfall > currAsk.askSize) {
+                    shortfall = currAsk.askSize;
+                }
+
+                double price = currAsk.askPrice;
+
+                ChildOrder order = new ChildOrder(shortfall, price, Order.actionType.NEW);
+                childOrders.add(order);
+
+                potentialCumulativeQuantity += shortfall;
+            }
+            // For passive posting.
+            // If order quantity is fulfilled or no more bids left.
+            while (potentialCumulativeQuantity == clientOrder.quantity || bids.hasNext()) {
+                Bid currBid = bids.next();
+                int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
+                double price = currBid.bidPrice;
+
+                ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
+                childOrders.add(order);
+
+                potentialCumulativeQuantity += quantity;
+            }
         }
+        logger.logOrders(childOrders);
     }
 }
