@@ -11,7 +11,7 @@ public class FIXParser {
     private final static String ORDER_QUANTITY_TAG = "38";
     private final static String TARGET_PERCENTAGE_TAG = "6404";
 
-    public Order parse(String fixMessage) {
+    public ParentOrder parse(String fixMessage) {
 
         ParentOrder.orderType type = null;
         int quantity = 0;

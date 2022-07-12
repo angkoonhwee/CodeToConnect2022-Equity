@@ -10,4 +10,18 @@ public class ChildOrder extends Order {
         this.price = price;
         this.action = action;
     }
+
+    private String actionToString() {
+        return action.equals(actionType.NEW)
+                ? "N"
+                : "C";
+    }
+
+    @Override
+    public String toString() {
+        return "[" + actionToString()
+                + ":" + price
+                + ":" + quantity
+                + "]";
+    }
 }

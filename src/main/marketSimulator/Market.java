@@ -12,7 +12,7 @@ public class Market {
         return orderBook;
     }
 
-    public void updateMarketVVol(int amount) {
+    public void updateMarketVol(int amount) {
         currMarketVol = currMarketVol + amount;
     }
 

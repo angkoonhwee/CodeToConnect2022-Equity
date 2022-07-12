@@ -13,7 +13,7 @@ public class MarketDataParser {
     private final String TRADE = "T";
 
     public OrderBook parse(String quote) throws IllegalArgumentException {
-        System.out.println(quote);
+//        System.out.println(quote);
         StringTokenizer splitQuote = new StringTokenizer(quote, ",");
 
         switch (splitQuote.nextToken()) {
@@ -22,6 +22,7 @@ public class MarketDataParser {
                 ob.setTimeStamp(splitQuote.nextToken());
                 ob.setBids(parseBids(splitQuote.nextToken()));
                 ob.setAsks(parseAsks(splitQuote.nextToken()));
+                return ob;
             case TRADE:
 
         }
@@ -46,7 +47,6 @@ public class MarketDataParser {
             treeSet.add(bid);
         }
 
-        System.out.println(treeSet);
         return treeSet;
     }
 
@@ -68,7 +68,6 @@ public class MarketDataParser {
             treeSet.add(ask);
         }
 
-        System.out.println(treeSet);
         return treeSet;
     }
 }
