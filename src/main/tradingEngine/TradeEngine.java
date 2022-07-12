@@ -12,10 +12,10 @@ import java.util.Iterator;
  */
 public class TradeEngine {
     Market market;
-    Order clientOrder;
+    ParentOrder clientOrder;
     OrderBook orderBook;
 
-    public TradeEngine(Market market, Order order) {
+    public TradeEngine(Market market, ParentOrder order) {
         this.market = market;
         this.clientOrder = order;
 
@@ -28,9 +28,11 @@ public class TradeEngine {
             Iterator<Bid> bids = orderBook.getBids().iterator();
 
             while (bids.hasNext()) {
-                int quantity = (int) (bids.next().bidSize * clientOrder.targetPercentage);
+                Bid currBid = bids.next();
+                int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
+                double price = currBid.bidPrice;
 
-//                Order order = new Order(quantity)
+                
             }
         }
     }

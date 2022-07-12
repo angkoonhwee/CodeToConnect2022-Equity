@@ -1,6 +1,7 @@
 package main.parser;
 
 import main.tradingEngine.Order;
+import main.tradingEngine.ParentOrder;
 
 public class FIXParser {
     private final static String SIDE_TAG = "54";
@@ -12,7 +13,7 @@ public class FIXParser {
 
     public Order parse(String fixMessage) {
 
-        Order.orderType type = null;
+        ParentOrder.orderType type = null;
         int quantity = 0;
         double targetPercentage = 0.0;
 
@@ -23,7 +24,9 @@ public class FIXParser {
 
             switch (processedTag[0]) {
                 case SIDE_TAG:
-                    type = processedTag[1] == SIDE_BUY ? Order.orderType.BUY : Order.orderType.SELL;
+                    type = processedTag[1] == SIDE_BUY ?
+                            ParentOrder.orderType.BUY
+                            : ParentOrder.orderType.SELL;
                     break;
                 case ORDER_QUANTITY_TAG:
                     quantity = Integer.parseInt(processedTag[1]);
@@ -36,7 +39,7 @@ public class FIXParser {
             }
         }
 
-        Order order = new Order(type, quantity, targetPercentage);
+        ParentOrder order = new ParentOrder(type, quantity, targetPercentage);
         System.out.println(order);
         return order;
     }
