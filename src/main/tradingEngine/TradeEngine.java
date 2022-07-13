@@ -6,7 +6,7 @@ import main.marketSimulator.Bid;
 import main.marketSimulator.Market;
 import main.marketSimulator.OrderBook;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 /**
@@ -17,18 +17,24 @@ public class TradeEngine {
     Market market;
     ParentOrder clientOrder;
     EquityLogger logger;
+    HashMap<Double, ChildOrder> queuedOrders;
 
     public TradeEngine(Market market, ParentOrder order, EquityLogger logger) {
         this.market = market;
         this.clientOrder = order;
         this.logger = logger;
+        queuedOrders = new HashMap<>();
     }
 
-    public ArrayList<ChildOrder> sliceOrder() {
+    public void updateQueuedOrders(HashMap<Double, ChildOrder> updated) {
+        this.queuedOrders = updated;
+    }
+
+    public HashMap<Double, ChildOrder> sliceOrder() {
         OrderBook orderBook = market.getOrderBook();
         Iterator<Bid> bids = orderBook.getBids().iterator();
         Iterator<Ask> asks = orderBook.getAsks().iterator();
-        ArrayList<ChildOrder> childOrders = new ArrayList<>();
+        HashMap<Double, ChildOrder> childOrders = new HashMap();
         int potentialCumulativeQuantity = clientOrder.cumulativeQuantity;
 
         if (market.getCurrMarketVol() == 0
@@ -36,11 +42,12 @@ public class TradeEngine {
             // market has just opened or order has been fulfilled, passive posting
             while (bids.hasNext()) {
                 Bid currBid = bids.next();
+                System.out.println(currBid);
                 int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
                 double price = currBid.bidPrice;
 
                 ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
-                childOrders.add(order);
+                childOrders.put(price, order);
 
                 potentialCumulativeQuantity += quantity;
             }
@@ -50,46 +57,50 @@ public class TradeEngine {
             while (potentialCumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio
                     && asks.hasNext()) {
                 Ask currAsk = asks.next();
+                System.out.println(currAsk);
 
                 // if shortfall is greater than currAsk size, quantity placed is limited to ask size
-                int shortfall = Math.max(
+                int shortfall = Math.min(
                         currAsk.askSize,
                         (int) (market.getCurrMarketVol() * clientOrder.minRatio) - potentialCumulativeQuantity);
                 double price = currAsk.askPrice;
 
                 ChildOrder order = new ChildOrder(shortfall, price, Order.actionType.NEW);
-                childOrders.add(order);
+                childOrders.put(price, order);
 
                 potentialCumulativeQuantity += shortfall;
             }
 
             // For passive posting.
-            while (potentialCumulativeQuantity != clientOrder.quantity || bids.hasNext()) {
+            while (potentialCumulativeQuantity != clientOrder.quantity && bids.hasNext()) {
                 Bid currBid = bids.next();
+                System.out.println(currBid);
                 int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
                 double price = currBid.bidPrice;
 
                 ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
-                childOrders.add(order);
+                childOrders.put(price, order);
 
                 potentialCumulativeQuantity += quantity;
             }
         } else if (clientOrder.cumulativeQuantity > market.getCurrMarketVol() * clientOrder.maxRatio) {
             // cumulative quantity exceeds current target percentage. Cancel all orders.
-            cancelOrders(new ArrayList<>());
+            childOrders = cancelOrders(queuedOrders);
         }
         logger.logOrders(childOrders);
         return childOrders;
     }
 
-    private void cancelOrders(ArrayList<ChildOrder> childOrders) {
-        ArrayList<ChildOrder> cancelledOrders = new ArrayList<>();
-        for (ChildOrder currOrder : childOrders) {
+    private HashMap<Double, ChildOrder> cancelOrders(HashMap<Double, ChildOrder> childOrders) {
+        HashMap<Double, ChildOrder> cancelledOrders = new HashMap<>();
+        Iterator<ChildOrder> childOrderIterator = childOrders.values().iterator();
+        while (childOrderIterator.hasNext()) {
+            ChildOrder currOrder = childOrderIterator.next();
             ChildOrder cancelledOrder = new ChildOrder(currOrder.quantity, currOrder.price, Order.actionType.CANCEL);
-            cancelledOrders.add(cancelledOrder);
+            cancelledOrders.put(currOrder.price, cancelledOrder);
         }
         // inform the simulator to clear the queue of orders.
 
-        logger.logOrders(cancelledOrders);
+        return cancelledOrders;
     }
 }

@@ -1,1 +1,3 @@
-Strategy out:[[N:53.15:3000], [N:53.1:5000], [N:52.9:200], [N:52.95:100], [N:53.0:1050]]
+Strategy out:[[N:52.95:100],[N:53.1:3000],[N:52.9:200],[N:53.0:1050],[N:53.05:5000]]
+Filled: 5000@53.05, Cumulative Quantity: 5000
+Filled: 3000@53.1, Cumulative Quantity: 8000

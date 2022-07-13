@@ -11,7 +11,7 @@ public class Ask implements Comparable<Ask> {
 
     @Override
     public int compareTo(Ask anotherAsk) {
-        return Double.compare(anotherAsk.askPrice, this.askPrice);
+        return Double.compare(this.askPrice, anotherAsk.askPrice);
     }
 
     @Override

@@ -4,6 +4,7 @@ import main.tradingEngine.ChildOrder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -38,12 +39,13 @@ public class EquityLogger {
         }
     }
 
-    public void logOrders(ArrayList<ChildOrder> order) {
-        System.out.println("ORDERS TO LOG: " + order);
-        logger.log(Level.INFO, "Strategy out:" + order.toString());
+    public void logOrders(HashMap<Double, ChildOrder> order) {
+        logger.log(Level.INFO, "Strategy out:" + order.values().toString()
+                .replaceAll("\\s+",""));
     }
 
-    public void logFills() {
-
+    public void logFills(ChildOrder filledOrder, int cumulativeQuantity) {
+        logger.log(Level.INFO, "Filled: " + filledOrder
+                + ", Cumulative Quantity: " + cumulativeQuantity);
     }
 }
