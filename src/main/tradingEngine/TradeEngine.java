@@ -24,7 +24,7 @@ public class TradeEngine {
         this.logger = logger;
     }
 
-    public void sliceOrder() {
+    public ArrayList<ChildOrder> sliceOrder() {
         OrderBook orderBook = market.getOrderBook();
         Iterator<Bid> bids = orderBook.getBids().iterator();
         Iterator<Ask> asks = orderBook.getAsks().iterator();
@@ -55,7 +55,6 @@ public class TradeEngine {
                 int shortfall = Math.max(
                         currAsk.askSize,
                         (int) (market.getCurrMarketVol() * clientOrder.minRatio) - potentialCumulativeQuantity);
-                
                 double price = currAsk.askPrice;
 
                 ChildOrder order = new ChildOrder(shortfall, price, Order.actionType.NEW);
@@ -65,7 +64,7 @@ public class TradeEngine {
             }
 
             // For passive posting.
-            while (potentialCumulativeQuantity == clientOrder.quantity || bids.hasNext()) {
+            while (potentialCumulativeQuantity != clientOrder.quantity || bids.hasNext()) {
                 Bid currBid = bids.next();
                 int quantity = (int) (currBid.bidSize * clientOrder.targetPercentage);
                 double price = currBid.bidPrice;
@@ -75,7 +74,22 @@ public class TradeEngine {
 
                 potentialCumulativeQuantity += quantity;
             }
-        } // breach max case
+        } else if (clientOrder.cumulativeQuantity > market.getCurrMarketVol() * clientOrder.maxRatio) {
+            // cumulative quantity exceeds current target percentage. Cancel all orders.
+            cancelOrders(new ArrayList<>());
+        }
         logger.logOrders(childOrders);
+        return childOrders;
+    }
+
+    private void cancelOrders(ArrayList<ChildOrder> childOrders) {
+        ArrayList<ChildOrder> cancelledOrders = new ArrayList<>();
+        for (ChildOrder currOrder : childOrders) {
+            ChildOrder cancelledOrder = new ChildOrder(currOrder.quantity, currOrder.price, Order.actionType.CANCEL);
+            cancelledOrders.add(cancelledOrder);
+        }
+        // inform the simulator to clear the queue of orders.
+
+        logger.logOrders(cancelledOrders);
     }
 }
