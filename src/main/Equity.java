@@ -38,7 +38,7 @@ public class Equity {
             BufferedReader br = new BufferedReader(fr);
             ParentOrder order = fixParser.parse("54=1; 40=1; 38=10000; 6404=10");
 
-            tradeEngine = new TradeEngine(market, order, logger);
+            tradeEngine = new TradeEngine(market, order);
             marketSimulator = new MarketSimulator(market, order, logger);
 
             String csv;
@@ -60,6 +60,7 @@ public class Equity {
 //                tradeEngine.updateQueuedOrders(test);
 
                 HashMap<Double, ChildOrder> recentOrder = tradeEngine.sliceOrder();
+                logger.logOrders(recentOrder);
                 tradeEngine.updateQueuedOrders(marketSimulator.fillOrders(recentOrder));
                 break;
             }

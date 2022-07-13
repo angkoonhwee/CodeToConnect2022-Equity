@@ -16,13 +16,11 @@ import java.util.Iterator;
 public class TradeEngine {
     Market market;
     ParentOrder clientOrder;
-    EquityLogger logger;
     HashMap<Double, ChildOrder> queuedOrders;
 
-    public TradeEngine(Market market, ParentOrder order, EquityLogger logger) {
+    public TradeEngine(Market market, ParentOrder order) {
         this.market = market;
         this.clientOrder = order;
-        this.logger = logger;
         queuedOrders = new HashMap<>();
     }
 
@@ -87,7 +85,6 @@ public class TradeEngine {
             // cumulative quantity exceeds current target percentage. Cancel all orders.
             childOrders = cancelOrders(queuedOrders);
         }
-        logger.logOrders(childOrders);
         return childOrders;
     }
 
