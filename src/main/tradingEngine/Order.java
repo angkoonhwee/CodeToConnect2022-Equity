@@ -36,7 +36,15 @@ public class Order {
             }
 
             OrderKey anotherKey = (OrderKey) o;
-            return anotherKey.type.equals(this.type) && anotherKey.equals(this.price);
+            return anotherKey.type.equals(this.type) && anotherKey.price == this.price;
+        }
+
+        @Override
+        public int hashCode() {
+            double hash = this.type.equals(actionType.NEW)
+                    ? 100000 + price * 100
+                    : -100000 + price * 100;
+            return (int) hash;
         }
     }
 }

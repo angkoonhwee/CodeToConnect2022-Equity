@@ -93,18 +93,18 @@ public class TradeEngine {
             ChildOrder queueOrder = queuedOrders.get(curr.key);
             System.out.println("Before: " + childOrders.values());
 
-            if (queueOrder != null) {
+            if (queueOrder != null && curr.action.equals(Order.actionType.NEW)) {
                 // Top up the difference
-                if (curr.action.equals(Order.actionType.NEW)
-                        && curr.quantity > queueOrder.quantity) {
+                if (curr.quantity > queueOrder.quantity) {
                     int difference = curr.quantity - queueOrder.quantity;
                     curr.updateChildOrder(difference);
                     System.out.println("After top up: " + childOrders.values());
                     // New order is smaller than original, cancel previous order
-                } else if (curr.action.equals(Order.actionType.NEW)
-                        && curr.quantity < queueOrder.quantity) {
+                } else if (curr.quantity < queueOrder.quantity) {
                     ChildOrder cancelOrder = new ChildOrder(curr.quantity, curr.price, Order.actionType.CANCEL);
                     childOrders.put(cancelOrder.key, cancelOrder);
+                } else {
+                    childOrders.remove(curr.key);
                 }
                 // should not have cancelled order case in queued order.
                 // Cancelled order can be fulfilled immediately by removing corresponding buy order from queue.
