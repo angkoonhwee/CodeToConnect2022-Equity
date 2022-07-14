@@ -34,7 +34,7 @@ public class Equity {
             logger.setupLogger("Equity", "outputLog.txt");
             FileReader fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
-            ParentOrder order = fixParser.parse("54=1; 40=1; 38=100000; 6404=10");
+            ParentOrder order = fixParser.parse("54=1; 40=1; 38=300000; 6404=10");
             System.out.println(order);
 
 
@@ -48,7 +48,6 @@ public class Equity {
                 mdp.parseAndUpdateMarket(csv, market);
                 logger.log(csv);
                 logger.log("Queued orders: " + marketSimulator.getQueuedOrders().values());
-                System.out.println("Before order filled: " + market.getCurrMarketVol());
 
                 // Trade Engine places all orders, including partial orders e.g. already queued [N:10:100]
                 // Top up order to 200@10 by placing another order [N:10:100]
@@ -58,16 +57,14 @@ public class Equity {
                 // Market Simulator will merge the orders so that when order is filled,
                 // "Filled: 200@10" will be shown.
                 // Merge order also includes removing cancelled orders.
-                HashMap<Order.OrderKey, ChildOrder> updateOrders = marketSimulator.fillOrders(recentOrder);
+                HashMap<Order.OrderKey, ChildOrder> updateOrders
+                        = marketSimulator.fillOrders(recentOrder, market.getOrderBook().getTimeStamp());
                 tradeEngine.updateQueuedOrders(updateOrders);
-                System.out.println("After order filled: " + market.getCurrMarketVol());
-                System.out.println();
-                i++;
-                if (i > 3500) {
-                    break;
-                }
-            }
+                logger.log("Market Volume: " + market.getCurrMarketVol());
 
+                if (i > 300) break;
+                i++;
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

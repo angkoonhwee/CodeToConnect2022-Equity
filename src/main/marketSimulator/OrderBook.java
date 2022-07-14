@@ -18,6 +18,10 @@ public class OrderBook {
         this.timeStamp = timeStamp;
     }
 
+    public int getTimeStamp() {
+        return Integer.parseInt(timeStamp);
+    }
+
     public void setBids(TreeSet<Bid> bids) {
         this.bids = bids;
     }

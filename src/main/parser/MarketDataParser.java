@@ -5,7 +5,6 @@ import main.marketSimulator.Bid;
 import main.marketSimulator.Market;
 import main.marketSimulator.OrderBook;
 
-import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
@@ -14,7 +13,6 @@ public class MarketDataParser {
     private final String TRADE = "T";
 
     public void parseAndUpdateMarket(String quote, Market market) throws IllegalArgumentException {
-//        System.out.println(quote);
         StringTokenizer splitQuote = new StringTokenizer(quote, ",");
 
         switch (splitQuote.nextToken()) {

@@ -39,10 +39,6 @@ public class TradeEngine {
         HashMap<Order.OrderKey, ChildOrder> childOrders = new HashMap<>();
         int potentialCumulativeQuantity = clientOrder.cumulativeQuantity;
 
-        if (clientOrder.quantity == potentialCumulativeQuantity) {
-            return childOrders;
-        }
-
         if (market.getCurrMarketVol() == 0 || market.getCurrMarketVol() == clientOrder.quantity) {
             childOrders.putAll(passivePosting(potentialCumulativeQuantity));
 
@@ -52,7 +48,8 @@ public class TradeEngine {
             childOrders.putAll(passivePosting(potentialCumulativeQuantity));
 //            System.out.println("orders after PP: " + childOrders.values());
 
-        } else if (clientOrder.cumulativeQuantity > market.getCurrMarketVol() * clientOrder.maxRatio) {
+        } else if (clientOrder.cumulativeQuantity > market.getCurrMarketVol() * clientOrder.maxRatio
+                || potentialCumulativeQuantity >= clientOrder.quantity) {
             // cumulative quantity exceeds current target percentage. Cancel all orders.
             childOrders.putAll(cancelOrders(queuedOrders));
         }
@@ -60,7 +57,8 @@ public class TradeEngine {
         // cancel queued orders that do not fulfill the new strategy
         for (ChildOrder queued : queuedOrders.values()) {
             if (!childOrders.containsKey(queued.key)) {
-                ChildOrder cancelOrder = new ChildOrder(queued.quantity, queued.price, Order.actionType.CANCEL);
+                ChildOrder cancelOrder = new ChildOrder(
+                        queued.quantity, queued.price, Order.actionType.CANCEL, market.getOrderBook().getTimeStamp());
                 childOrders.put(cancelOrder.key, cancelOrder);
             }
         }
@@ -78,7 +76,8 @@ public class TradeEngine {
                     curr.updateChildOrder(difference);
                     // New order is smaller than original, cancel previous order
                 } else if (curr.quantity < queueOrder.quantity) {
-                    ChildOrder cancelOrder = new ChildOrder(queueOrder.quantity, queueOrder.price, Order.actionType.CANCEL);
+                    ChildOrder cancelOrder = new ChildOrder(queueOrder.quantity, queueOrder.price, Order.actionType.CANCEL,
+                            market.getOrderBook().getTimeStamp());
                     immutable.put(cancelOrder.key, cancelOrder);
                 } else {
                     immutable.remove(curr.key);
@@ -100,7 +99,8 @@ public class TradeEngine {
 
         while (childOrderIterator.hasNext()) {
             ChildOrder currOrder = childOrderIterator.next();
-            ChildOrder cancelledOrder = new ChildOrder(currOrder.quantity, currOrder.price, Order.actionType.CANCEL);
+            ChildOrder cancelledOrder = new ChildOrder(currOrder.quantity, currOrder.price,
+                    Order.actionType.CANCEL, market.getOrderBook().getTimeStamp());
             cancelledOrders.put(currOrder.key, cancelledOrder);
         }
 
@@ -128,7 +128,8 @@ public class TradeEngine {
                 continue;
             }
 
-            ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
+            ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW,
+                    market.getOrderBook().getTimeStamp());
             childOrders.put(order.key, order);
 
             potentialCumulativeQuantity += quantity;
@@ -166,7 +167,8 @@ public class TradeEngine {
                 continue;
             }
 
-            ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW);
+            ChildOrder order = new ChildOrder(quantity, price, Order.actionType.NEW,
+                    market.getOrderBook().getTimeStamp());
             childOrders.put(order.key, order);
 
             potentialCumulativeQuantity += quantity;

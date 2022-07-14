@@ -7,12 +7,13 @@ public class ChildOrder extends Order {
     public int timestamp;
     public OrderKey key;
 
-    public ChildOrder(int quantity, double price, actionType action) {
+    public ChildOrder(int quantity, double price, actionType action, int timestamp) {
         super(quantity);
 
         this.price = price;
         this.action = action;
         this.isFilled = false;
+        this.timestamp = timestamp;
         key = new OrderKey(action, price);
     }
 
