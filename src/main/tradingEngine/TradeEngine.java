@@ -15,7 +15,7 @@ import java.util.Iterator;
 public class TradeEngine {
     Market market;
     ParentOrder clientOrder;
-    HashMap<Order.OrderKey, ChildOrder> queuedOrders; // orders that are queued in simulator but yet to be filled
+    public HashMap<Order.OrderKey, ChildOrder> queuedOrders; // orders that are queued in simulator but yet to be filled
 
     public TradeEngine(Market market, ParentOrder order) {
         this.market = market;
@@ -87,6 +87,14 @@ public class TradeEngine {
             childOrders = cancelOrders(queuedOrders);
         }
 
+        // cancel queued orders that do not fulfill the new strategy
+        for (ChildOrder queued : queuedOrders.values()) {
+            if (!childOrders.containsKey(queued.key)) {
+                ChildOrder cancelOrder = new ChildOrder(queued.quantity, queued.price, Order.actionType.CANCEL);
+                childOrders.put(cancelOrder.key, cancelOrder);
+            }
+        }
+
         // compare to queued orders
         for (ChildOrder curr : childOrders.values()) {
             // match child order, if possible, with existing queue orders
@@ -110,6 +118,7 @@ public class TradeEngine {
                 // Cancelled order can be fulfilled immediately by removing corresponding buy order from queue.
             }
         }
+
         return childOrders;
     }
 

@@ -61,6 +61,7 @@ public class Equity {
                 // Trade Engine places all orders, including partial orders e.g. already queued [N:10:100]
                 // Top up order to 200@10 by placing another order [N:10:100]
                 HashMap<Order.OrderKey, ChildOrder> recentOrder = tradeEngine.sliceOrder();
+                logger.logOrders(tradeEngine.queuedOrders);
                 logger.logOrders(recentOrder);
 
                 // Market Simulator will merge the orders so that when order is filled,
