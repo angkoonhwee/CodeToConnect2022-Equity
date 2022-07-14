@@ -33,4 +33,10 @@ public class OrderBook {
     public TreeSet<Ask> getAsks() {
         return asks;
     }
+
+    @Override
+    public String toString() {
+        return "Bids: " + bids
+                + ", Asks: " + asks;
+    }
 }

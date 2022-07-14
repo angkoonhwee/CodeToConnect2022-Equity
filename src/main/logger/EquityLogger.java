@@ -49,4 +49,8 @@ public class EquityLogger {
         logger.log(Level.INFO, "Filled: " + filledOrder
                 + ", Cumulative Quantity: " + cumulativeQuantity);
     }
+
+    public void log(String message) {
+        logger.log(Level.INFO, message);
+    }
 }

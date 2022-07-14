@@ -1,6 +1,5 @@
 package main.parser;
 
-import main.tradingEngine.Order;
 import main.tradingEngine.ParentOrder;
 
 public class FIXParser {
@@ -40,7 +39,6 @@ public class FIXParser {
         }
 
         ParentOrder order = new ParentOrder(type, quantity, targetPercentage);
-        System.out.println(order);
         return order;
     }
 }

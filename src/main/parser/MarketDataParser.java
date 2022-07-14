@@ -2,6 +2,7 @@ package main.parser;
 
 import main.marketSimulator.Ask;
 import main.marketSimulator.Bid;
+import main.marketSimulator.Market;
 import main.marketSimulator.OrderBook;
 
 import java.util.PriorityQueue;
@@ -12,7 +13,7 @@ public class MarketDataParser {
     private final String QUOTE = "Q";
     private final String TRADE = "T";
 
-    public OrderBook parse(String quote) throws IllegalArgumentException {
+    public void parseAndUpdateMarket(String quote, Market market) throws IllegalArgumentException {
 //        System.out.println(quote);
         StringTokenizer splitQuote = new StringTokenizer(quote, ",");
 
@@ -22,11 +23,15 @@ public class MarketDataParser {
                 ob.setTimeStamp(splitQuote.nextToken());
                 ob.setBids(parseBids(splitQuote.nextToken()));
                 ob.setAsks(parseAsks(splitQuote.nextToken()));
-                return ob;
+                market.setOrderBook(ob);
+                break;
             case TRADE:
-
+                splitQuote.nextToken();
+                splitQuote.nextToken();
+                market.updateMarketVol(Integer.parseInt(splitQuote.nextToken()));
+                break;
         }
-       return null;
+       return;
     }
 
     private TreeSet<Bid> parseBids(String bids) {

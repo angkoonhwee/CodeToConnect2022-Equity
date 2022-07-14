@@ -22,7 +22,7 @@ public class ParentOrder extends Order {
         this.maxRatio = (1.2 * targetPercentage)/100;
     }
 
-    public void updateCumulativeQuatity(int amount) {
+    public void updateCumulativeQuantity(int amount) {
         this.cumulativeQuantity += amount;
     }
 
