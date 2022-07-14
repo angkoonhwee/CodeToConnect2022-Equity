@@ -5,9 +5,7 @@ import main.tradingEngine.ChildOrder;
 import main.tradingEngine.Order;
 import main.tradingEngine.ParentOrder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Keep track of orders and fill them when marketable.
@@ -15,7 +13,7 @@ import java.util.Iterator;
  */
 public class MarketSimulator {
     ParentOrder clientOrder;
-    HashMap<Double, ChildOrder> orders;
+    HashMap<Order.OrderKey, ChildOrder> orders;
     Market market;
     EquityLogger logger;
 
@@ -31,29 +29,23 @@ public class MarketSimulator {
      * @param childOrders orders placed by Trade Engine based on current quote.
      * @return unfilled orders to Trade Engine so that Trade Engine can decide next strategy.
      */
-    public HashMap<Double, ChildOrder> fillOrders(HashMap<Double, ChildOrder> childOrders) {
-        Iterator<Ask> asks = market.getOrderBook().getAsks().iterator();
+    public HashMap<Order.OrderKey, ChildOrder> fillOrders(HashMap<Order.OrderKey, ChildOrder> childOrders) {
 
-        while (asks.hasNext()) {
-            Ask curr = asks.next();
-
+        for (Ask curr : market.getOrderBook().getAsks()) {
             // Check marketable orders, i.e. orders buying at ask price
-            if (childOrders.containsKey(curr.askPrice)) {
-                ChildOrder childOrder = childOrders.get(curr.askPrice);
+            Order.OrderKey checkKey = new Order.OrderKey(Order.actionType.NEW, curr.askPrice);
+            if (childOrders.containsKey(checkKey)) {
+                ChildOrder childOrder = childOrders.get(checkKey);
 
-                // if cancel order, remove from order queue.
-                if (childOrder.action.equals(Order.actionType.CANCEL)) {
-                    childOrders.remove(curr.askPrice);
-                    continue;
-                }
                 // order is marketable. Fill order.
                 childOrder.fillOrder();
                 clientOrder.updateCumulativeQuatity(childOrder.quantity);
+                // log filled orders
                 logger.logFills(childOrder, clientOrder.cumulativeQuantity);
-
-                // remove filled order from queue.
-                childOrders.remove(curr.askPrice);
             }
+
+            // remove filled order and cancelled order from queue.
+            childOrders.remove(checkKey);
         }
 
         this.orders = childOrders;
@@ -62,10 +54,20 @@ public class MarketSimulator {
 
     /**
      * Merge recent orders and past orders if they have the same price.
-     * @param recentOrder
-     * @return
+     * @param recentOrder newly placed orders by trade engine
+     * @return top ups of previous orders and rest of the orders, cancel corresponding orders.
      */
-    private HashMap<Double, ChildOrder> mergeOrders(HashMap<Double, ChildOrder> recentOrder) {
+    private HashMap<Order.OrderKey, ChildOrder> mergeOrders(HashMap<Order.OrderKey, ChildOrder> recentOrder) {
+
+        for (ChildOrder curr : recentOrder.values()) {
+            ChildOrder queuedOrder = orders.get(curr.key);
+
+            if (queuedOrder != null) {
+                if (queuedOrder.action.equals(Order.actionType.NEW)) {
+
+                }
+            }
+        }
         return null;
     }
 }

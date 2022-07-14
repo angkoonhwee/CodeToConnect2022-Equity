@@ -5,6 +5,7 @@ public class ChildOrder extends Order {
     public double price;
     public actionType action;
     public int timestamp;
+    public OrderKey key;
 
     public ChildOrder(int quantity, double price, actionType action) {
         super(quantity);
@@ -12,12 +13,17 @@ public class ChildOrder extends Order {
         this.price = price;
         this.action = action;
         this.isFilled = false;
+        key = new OrderKey(action, price);
     }
 
     private String actionToString() {
         return action.equals(actionType.NEW)
                 ? "N"
                 : "C";
+    }
+
+    public void updateChildOrder(int quantity) {
+        this.quantity = quantity;
     }
 
     public void fillOrder() {

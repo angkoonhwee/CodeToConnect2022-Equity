@@ -1,6 +1,7 @@
 package main.logger;
 
 import main.tradingEngine.ChildOrder;
+import main.tradingEngine.Order;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class EquityLogger {
         }
     }
 
-    public void logOrders(HashMap<Double, ChildOrder> order) {
+    public void logOrders(HashMap<Order.OrderKey, ChildOrder> order) {
         logger.log(Level.INFO, "Strategy out:" + order.values().toString()
                 .replaceAll("\\s+",""));
     }
