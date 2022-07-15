@@ -26,6 +26,12 @@ public class Order {
         }
 
         @Override
+        public String toString() {
+            return "Type: " + (type.equals(actionType.NEW) ? "NEW" : "CANCEL")
+                    + " Price: " + price;
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;

@@ -42,19 +42,20 @@ public class MarketSimulator {
         HashMap<Order.OrderKey, ChildOrder> mergedOrders = mergeOrders(childOrders);
 
         // check current best bid price. if queued orders contain best bid price && time difference = 3 mins, fill order
-        double bestBidPrice = getBestBid();
+        double bestBidPrice = getBestBid(currTime);
         if ((currTime - bestBidTime) >= THREE_MIN_IN_MS) {
             Order.OrderKey key = new Order.OrderKey(Order.actionType.NEW, bestBidPrice);
             ChildOrder stagnant = mergedOrders.get(key);
-            logger.log("STAGNANT: " + stagnant);
 
-            stagnant.fillOrder();
-            clientOrder.updateCumulativeQuantity(stagnant.quantity);
-            market.updateMarketVol(stagnant.quantity);
+            if (stagnant != null) {
+                stagnant.fillOrder();
+                clientOrder.updateCumulativeQuantity(stagnant.quantity);
+                market.updateMarketVol(stagnant.quantity);
 
-            logger.logFills(stagnant, clientOrder.cumulativeQuantity);
+                logger.logFills(stagnant, clientOrder.cumulativeQuantity);
 
-            mergedOrders.remove(key);
+                mergedOrders.remove(key);
+            }
         }
 
         for (Ask curr : market.getOrderBook().getAsks()) {
@@ -88,16 +89,16 @@ public class MarketSimulator {
 
         HashMap<Order.OrderKey, ChildOrder> immutable = new HashMap<>(orders);
         for (ChildOrder curr : recentOrder.values()) {
-            ChildOrder queuedOrder = orders.get(curr.key);
 
+            ChildOrder queuedOrder = immutable.get(curr.key);
             // queued order would not have cancelled orders
             if (queuedOrder != null && queuedOrder.action.equals(Order.actionType.NEW)) {
                 // new orders with same key, merge quantity
                 int total = queuedOrder.quantity + curr.quantity;
-                logger.log("TOP UP TOTAL: " + total);
                 curr.updateChildOrder(total);
             } else if (curr.action.equals(Order.actionType.CANCEL)) {
-                immutable.remove(new Order.OrderKey(Order.actionType.NEW, curr.price));
+                Order.OrderKey key = new Order.OrderKey(Order.actionType.NEW, curr.price);
+                immutable.remove(key);
                 continue;
             }
             immutable.put(curr.key, curr);
@@ -106,7 +107,7 @@ public class MarketSimulator {
         return immutable;
     }
 
-    private double getBestBid() {
+    private double getBestBid(int curTime) {
         double highestBidPrice = 0;
         if (orders.isEmpty()) {
             bestBidTime = market.getOrderBook().getTimeStamp();
@@ -114,10 +115,10 @@ public class MarketSimulator {
         for (ChildOrder order: orders.values()) {
             double temp = Math.max(highestBidPrice, order.price);
             // new highest bid
-            if (temp != highestBidPrice) {
+            if (temp != highestBidPrice && order.action.equals(Order.actionType.NEW)) {
                 highestBidPrice = temp;
-                // update best bid time
-                bestBidTime = order.timestamp;
+                // update best bid time since last checked
+                bestBidTime = curTime;
             }
         }
         return highestBidPrice;

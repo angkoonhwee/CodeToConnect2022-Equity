@@ -28,26 +28,28 @@ public class Equity {
         MarketSimulator marketSimulator;
         Market market = new Market();
 
-        File f = new File("market_data\\market_data.csv");
+        File fMarket = new File(args[0]);
+        File fFIX = new File(args[1]);
 
         try {
             logger.setupLogger("Equity", "outputLog.txt");
-            FileReader fr = new FileReader(f);
-            BufferedReader br = new BufferedReader(fr);
-            ParentOrder order = fixParser.parse("54=1; 40=1; 38=300000; 6404=10");
-            System.out.println(order);
 
+            FileReader frMarket = new FileReader(fMarket);
+            BufferedReader brMarket = new BufferedReader(frMarket);
+            FileReader frFIX = new FileReader(fFIX);
+
+            BufferedReader brFIX = new BufferedReader(frFIX);
+            ParentOrder order = fixParser.parse(brFIX.readLine());
+            System.out.println(order);
 
             tradeEngine = new TradeEngine(market, order);
             marketSimulator = new MarketSimulator(market, order, logger);
 
             int i = 0;
             String csv;
-            while ((csv = br.readLine()) != null) {
+            while ((csv = brMarket.readLine()) != null) {
                 System.out.println(csv);
                 mdp.parseAndUpdateMarket(csv, market);
-                logger.log(csv);
-                logger.log("Queued orders: " + marketSimulator.getQueuedOrders().values());
 
                 // Trade Engine places all orders, including partial orders e.g. already queued [N:10:100]
                 // Top up order to 200@10 by placing another order [N:10:100]
@@ -60,10 +62,6 @@ public class Equity {
                 HashMap<Order.OrderKey, ChildOrder> updateOrders
                         = marketSimulator.fillOrders(recentOrder, market.getOrderBook().getTimeStamp());
                 tradeEngine.updateQueuedOrders(updateOrders);
-                logger.log("Market Volume: " + market.getCurrMarketVol());
-
-                if (i > 300) break;
-                i++;
             }
 
         } catch (FileNotFoundException e) {
