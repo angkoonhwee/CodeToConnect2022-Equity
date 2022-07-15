@@ -44,9 +44,7 @@ public class TradeEngine {
 
         } else if (clientOrder.cumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio) {
             childOrders.putAll(aggressivePosting(potentialCumulativeQuantity));
-//            System.out.println("orders after AP: " + childOrders.values());
             childOrders.putAll(passivePosting(potentialCumulativeQuantity));
-//            System.out.println("orders after PP: " + childOrders.values());
 
         } else if (clientOrder.cumulativeQuantity > market.getCurrMarketVol() * clientOrder.maxRatio
                 || potentialCumulativeQuantity >= clientOrder.quantity) {
@@ -95,7 +93,6 @@ public class TradeEngine {
     private HashMap<Order.OrderKey, ChildOrder> cancelOrders(HashMap<Order.OrderKey, ChildOrder> childOrders) {
         HashMap<Order.OrderKey, ChildOrder> cancelledOrders = new HashMap<>();
         Iterator<ChildOrder> childOrderIterator = childOrders.values().iterator();
-        System.out.println("BREACH MAX");
 
         while (childOrderIterator.hasNext()) {
             ChildOrder currOrder = childOrderIterator.next();
@@ -117,7 +114,6 @@ public class TradeEngine {
         HashMap<Order.OrderKey, ChildOrder> childOrders = new HashMap<>();
         Iterator<Bid> bids = market.getOrderBook().getBids().iterator();
 
-        System.out.println("PASSIVE POSTING");
         while (bids.hasNext() && potentialCumulativeQuantity < clientOrder.quantity) {
             Bid currBid = bids.next();
             int quantity = Math.min(clientOrder.quantity - potentialCumulativeQuantity,
@@ -148,7 +144,6 @@ public class TradeEngine {
         HashMap<Order.OrderKey, ChildOrder> childOrders = new HashMap<>();
         Iterator<Ask> asks = market.getOrderBook().getAsks().iterator();
 
-        System.out.println("BEHIND MIN");
         while (potentialCumulativeQuantity < market.getCurrMarketVol() * clientOrder.minRatio
                 && potentialCumulativeQuantity < clientOrder.quantity
                 && asks.hasNext() ) {

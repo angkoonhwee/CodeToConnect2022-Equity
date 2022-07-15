@@ -40,15 +40,12 @@ public class Equity {
 
             BufferedReader brFIX = new BufferedReader(frFIX);
             ParentOrder order = fixParser.parse(brFIX.readLine());
-            System.out.println(order);
 
             tradeEngine = new TradeEngine(market, order);
             marketSimulator = new MarketSimulator(market, order, logger);
 
-            int i = 0;
             String csv;
             while ((csv = brMarket.readLine()) != null) {
-                System.out.println(csv);
                 mdp.parseAndUpdateMarket(csv, market);
 
                 // Trade Engine places all orders, including partial orders e.g. already queued [N:10:100]
@@ -66,6 +63,7 @@ public class Equity {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            System.out.println("Please enter a valid file path.");
         } catch (IOException e) {
             e.printStackTrace();
         }
